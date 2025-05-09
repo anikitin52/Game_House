@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35208.52
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game_House", "Game_House.csproj", "{A1D317B0-44EF-4F09-9272-2C8A873939C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{55EC75F6-1E9F-4B7E-8A51-B4B3CF632B3D}"
+	ProjectSection(SolutionItems) = preProject
+		Camera.cs = Camera.cs
+		Game.cs = Game.cs
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1D317B0-44EF-4F09-9272-2C8A873939C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1D317B0-44EF-4F09-9272-2C8A873939C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1D317B0-44EF-4F09-9272-2C8A873939C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1D317B0-44EF-4F09-9272-2C8A873939C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {736FD0E9-96AC-47EC-A667-EAB13C48E3C3}
+	EndGlobalSection
+EndGlobal
