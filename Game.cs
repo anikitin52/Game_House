@@ -296,7 +296,7 @@ new Vector3(0,0.8f,0.2f),
 
         protected override void OnMouseWheel(MouseWheelEventArgs e)
         {
-            _brightness = Math.Clamp(_brightness + e.OffsetY * 0.1f, 0.2f, 1.5f);
+            _brightness = Math.Clamp(_brightness + e.OffsetY * 0.1f, 0.0f, 3.0f);
             base.OnMouseWheel(e);
         }
 
@@ -451,7 +451,10 @@ new Vector3(0,0.8f,0.2f),
             // Настройка освещения
             Vector3 lightPos = camera.position + new Vector3(2f, 2f, 0f);
             GL.Uniform3(GL.GetUniformLocation(shaderProgram.shaderHandle, "lightPos"), lightPos);
+            // Передача яркости освещения
             GL.Uniform1(GL.GetUniformLocation(shaderProgram.shaderHandle, "lightIntensity"), _brightness);
+
+
 
             // Привязка VAO и EBO
             GL.BindVertexArray(VAO);
