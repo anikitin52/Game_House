@@ -15,14 +15,18 @@ using StbImageSharp;
 
 namespace Open_TK
 {
+    // Класс для работы с шейдерами
     public class Shader
     {
-        public int shaderHandle;
+        public int shaderHandle;  // Идентификатор шейдерной программы 
 
+        // Загрузка шейдера 
         public void LoadShader()
         {
+            // Создание шейдерной программы 
             shaderHandle = GL.CreateProgram();
 
+            // Загрузка вершинного шейдера
             int vertexShader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vertexShader, LoadShaderSource("shader.vert"));
             GL.CompileShader(vertexShader);
@@ -34,6 +38,7 @@ namespace Open_TK
                 Console.WriteLine(infoLog);
             }
 
+            // Загрузка фрагментного шейдера
             int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(fragmentShader, LoadShaderSource("shader.frag"));
             GL.CompileShader(fragmentShader);
@@ -45,24 +50,29 @@ namespace Open_TK
                 Console.WriteLine(infoLog);
             }
 
+            // Настройка шейдеров: Присоединение к основной программе и линковка 
             GL.AttachShader(shaderHandle, vertexShader);
             GL.AttachShader(shaderHandle, fragmentShader);
-
             GL.LinkProgram(shaderHandle);
 
+            // Удаление ресурсов 
             GL.DeleteShader(vertexShader);
             GL.DeleteShader(fragmentShader);
         }
 
+        // Активация шейдерной программы 
         public void UseShader()
         {
             GL.UseProgram(shaderHandle);
         }
+
+        // Удаление шейдерной программы
         public void DeleteShader()
         {
             GL.DeleteProgram(shaderHandle);
         }
 
+        // Загрузка кода шейдера из файла 
         public static string LoadShaderSource(string filepath)
         {
             string shaderSource = "";
@@ -79,213 +89,196 @@ namespace Open_TK
             }
             return shaderSource;
         }
-
-
     }
 
-
+    // Основной класс игры 
     internal class Game : GameWindow
     {
-        int width, height;
+        int width, height; // Размеры окна
 
-        // Вершины (основной корпус + крыша + дымоход + пол + потолок)
+        // Вершины
         List<Vector3> vertices = new List<Vector3>()
-{
-    // Основной корпус (1.5x2x1)
-    // Передняя грань
-    new Vector3(-0.75f, -1.0f, 0.5f),   // 0
-    new Vector3(0.75f, -1.0f, 0.5f),    // 1
-    new Vector3(0.75f, 1.0f, 0.5f),     // 2
-    new Vector3(-0.75f, 1.0f, 0.5f),    // 3
+        {
+        // Основной корпус
+        // Передняя грань (стены)
+        new Vector3(-0.75f, -1.0f, 0.5f),   // 0
+        new Vector3(0.75f, -1.0f, 0.5f),    // 1
+        new Vector3(0.75f, 1.0f, 0.5f),     // 2
+        new Vector3(-0.75f, 1.0f, 0.5f),    // 3
 
-    // Задняя грань
-    new Vector3(-0.75f, -1.0f, -0.5f),  // 4
-    new Vector3(0.75f, -1.0f, -0.5f),   // 5
-    new Vector3(0.75f, 1.0f, -0.5f),    // 6
-    new Vector3(-0.75f, 1.0f, -0.5f),   // 7
+        // Задняя грань
+        new Vector3(-0.75f, -1.0f, -0.5f),  // 4
+        new Vector3(0.75f, -1.0f, -0.5f),   // 5
+        new Vector3(0.75f, 1.0f, -0.5f),    // 6
+        new Vector3(-0.75f, 1.0f, -0.5f),   // 7
 
-    // Левая грань
-    new Vector3(-0.75f, -1.0f, -0.5f),  // 8
-    new Vector3(-0.75f, -1.0f, 0.5f),   // 9
-    new Vector3(-0.75f, 1.0f, 0.5f),    // 10
-    new Vector3(-0.75f, 1.0f, -0.5f),   // 11
+        // Левая грань
+        new Vector3(-0.75f, -1.0f, -0.5f),  // 8
+        new Vector3(-0.75f, -1.0f, 0.5f),   // 9
+        new Vector3(-0.75f, 1.0f, 0.5f),    // 10
+        new Vector3(-0.75f, 1.0f, -0.5f),   // 11
 
-    // Правая грань
-    new Vector3(0.75f, -1.0f, 0.5f),    // 12
-    new Vector3(0.75f, -1.0f, -0.5f),   // 13
-    new Vector3(0.75f, 1.0f, -0.5f),    // 14
-    new Vector3(0.75f, 1.0f, 0.5f),     // 15
+        // Правая грань
+        new Vector3(0.75f, -1.0f, 0.5f),    // 12
+        new Vector3(0.75f, -1.0f, -0.5f),   // 13
+        new Vector3(0.75f, 1.0f, -0.5f),    // 14
+        new Vector3(0.75f, 1.0f, 0.5f),     // 15
 
-    // Пол (нижняя грань)
-    new Vector3(-0.75f, -1.0f, 0.5f),   // 16
-    new Vector3(0.75f, -1.0f, 0.5f),    // 17
-    new Vector3(0.75f, -1.0f, -0.5f),   // 18
-    new Vector3(-0.75f, -1.0f, -0.5f),  // 19
+        // Пол (нижняя грань)
+        new Vector3(-0.75f, -1.0f, 0.5f),   // 16
+        new Vector3(0.75f, -1.0f, 0.5f),    // 17
+        new Vector3(0.75f, -1.0f, -0.5f),   // 18
+        new Vector3(-0.75f, -1.0f, -0.5f),  // 19
 
-    // Потолок (верхняя грань)
-    new Vector3(-0.75f, 1.0f, 0.5f),    // 20
-    new Vector3(0.75f, 1.0f, 0.5f),     // 21
-    new Vector3(0.75f, 1.0f, -0.5f),    // 22
-    new Vector3(-0.75f, 1.0f, -0.5f),   // 23
+        // Потолок (верхняя грань)
+        new Vector3(-0.75f, 1.0f, 0.5f),    // 20
+        new Vector3(0.75f, 1.0f, 0.5f),     // 21
+        new Vector3(0.75f, 1.0f, -0.5f),    // 22
+        new Vector3(-0.75f, 1.0f, -0.5f),   // 23
 
-    // Крыша (передний треугольник)
-    new Vector3(-1.0f, 1.0f, 0.6f),     // 24
-    new Vector3(1.0f, 1.0f, 0.6f),      // 25
-    new Vector3(0.0f, 2.0f, 0.0f),      // 26 (верхушка)
+        // Крыша (передний треугольник)
+        new Vector3(-1.0f, 1.0f, 0.6f),     // 24
+        new Vector3(1.0f, 1.0f, 0.6f),      // 25
+        new Vector3(0.0f, 2.0f, 0.0f),      // 26 (верхушка)
 
-    // Крыша (задний треугольник)
-    new Vector3(-1.0f, 1.0f, -0.6f),    // 27
-    new Vector3(1.0f, 1.0f, -0.6f),     // 28
+        // Крыша (задний треугольник)
+        new Vector3(-1.0f, 1.0f, -0.6f),    // 27
+        new Vector3(1.0f, 1.0f, -0.6f),     // 28
 
-    // Нижняя грань крыши (прямоугольник)
-    new Vector3(-1.0f, 1.0f, 0.6f),     // 29 (совпадает с 24)
-    new Vector3(1.0f, 1.0f, 0.6f),      // 30 (совпадает с 25)
-    new Vector3(1.0f, 1.0f, -0.6f),     // 31 (совпадает с 28)
-    new Vector3(-1.0f, 1.0f, -0.6f),    // 32 (совпадает с 27)
+        // Нижняя грань крыши (прямоугольник)
+        new Vector3(-1.0f, 1.0f, 0.6f),     // 29 
+        new Vector3(1.0f, 1.0f, 0.6f),      // 30 
+        new Vector3(1.0f, 1.0f, -0.6f),     // 31 
+        new Vector3(-1.0f, 1.0f, -0.6f),    // 32
 
-    // Боковые грани крыши (левая и правая)
-    new Vector3(-1.0f, 1.0f, 0.6f),     // 33 (совпадает с 24)
-    new Vector3(-1.0f, 1.0f, -0.6f),    // 34 (совпадает с 27)
-    new Vector3(1.0f, 1.0f, 0.6f),      // 35 (совпадает с 25)
-    new Vector3(1.0f, 1.0f, -0.6f),     // 36 (совпадает с 28)
+        // Боковые грани крыши (левая и правая)
+        new Vector3(-1.0f, 1.0f, 0.6f),     // 33
+        new Vector3(-1.0f, 1.0f, -0.6f),    // 34 
+        new Vector3(1.0f, 1.0f, 0.6f),      // 35
+        new Vector3(1.0f, 1.0f, -0.6f),     // 36 
 
 
-    // Дымоход
-    // В списке vertices замените вершины дымохода на:
-// Дымоход (смещение по X на 0.5f вправо)
-new Vector3(0.3f, 1.0f, 0.2f),   // 37 (передняя нижняя правая)
-new Vector3(0.7f, 1.0f, 0.2f),    // 38 (передняя нижняя дальняя)
-new Vector3(0.7f, 1.8f, 0.2f),    // 39 (передняя верхняя дальняя)
-new Vector3(0.3f, 1.8f, 0.2f),   // 40 (передняя верхняя ближняя)
+        // Дымоход
+        new Vector3(0.3f, 1.0f, 0.2f),   // 37 (передняя нижняя правая)
+        new Vector3(0.7f, 1.0f, 0.2f),    // 38 (передняя нижняя дальняя)
+        new Vector3(0.7f, 1.8f, 0.2f),    // 39 (передняя верхняя дальняя)
+        new Vector3(0.3f, 1.8f, 0.2f),   // 40 (передняя верхняя ближняя)
     
-new Vector3(0.3f, 1.0f, -0.2f),  // 41 (задняя нижняя ближняя)
-new Vector3(0.7f, 1.0f, -0.2f),   // 42 (задняя нижняя дальняя)
-new Vector3(0.7f, 1.8f, -0.2f),   // 43 (задняя верхняя дальняя)
-new Vector3(0.3f, 1.8f, -0.2f),  // 44 (задняя верхняя ближняя)
-};
+        new Vector3(0.3f, 1.0f, -0.2f),  // 41 (задняя нижняя ближняя)
+        new Vector3(0.7f, 1.0f, -0.2f),   // 42 (задняя нижняя дальняя)
+        new Vector3(0.7f, 1.8f, -0.2f),   // 43 (задняя верхняя дальняя)
+        new Vector3(0.3f, 1.8f, -0.2f),  // 44 (задняя верхняя ближняя)
+        };
 
         // Текстурные координаты
         List<Vector2> texCoords = new List<Vector2>()
-{
-    // Основной корпус (6 граней)
-    // Передняя, задняя, левая, правая
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
+        {
+        // Основной корпус (6 граней)
+        // Передняя, задняя, левая, правая
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
 
-    // Пол и потолок (используют текстуру крыши)
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Пол
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Потолок
+        // Пол и потолок
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Пол
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Потолок
 
-    // Передний треугольник крыши
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 1),
+        // Передний треугольник крыши
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 1),
 
-    // Задний треугольник крыши
-    new Vector2(0, 0), new Vector2(1, 0),
+        // Задний треугольник крыши
+        new Vector2(0, 0), new Vector2(1, 0),
 
-    // Нижняя грань крыши
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
+        // Нижняя грань крыши
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1),
 
-    // Боковые грани
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 1),
-    new Vector2(0, 0), new Vector2(1, 0),
+        // Боковые грани
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(0.5f, 1),
+        new Vector2(0, 0), new Vector2(1, 0),
 
-    // Дымоход (6 граней)
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Перед
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Зад
-    new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Верх
-};
+        // Дымоход (6 граней)
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Перед
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Зад
+        new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1), // Верх
+        };
 
         // Нормали
         List<Vector3> normals = new List<Vector3>()
-{
-    // Основной корпус
-    new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1), // Перед
-    new Vector3(0, 0, -1), new Vector3(0, 0, -1), new Vector3(0, 0, -1), new Vector3(0, 0, -1), // Зад
-    new Vector3(-1, 0, 0), new Vector3(-1, 0, 0), new Vector3(-1, 0, 0), new Vector3(-1, 0, 0), // Левая
-    new Vector3(1, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 0, 0), // Правая
+        {
+        // Основной корпус
+        new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1), new Vector3(0, 0, 1), // Перед
+        new Vector3(0, 0, -1), new Vector3(0, 0, -1), new Vector3(0, 0, -1), new Vector3(0, 0, -1), // Зад
+        new Vector3(-1, 0, 0), new Vector3(-1, 0, 0), new Vector3(-1, 0, 0), new Vector3(-1, 0, 0), // Левая
+        new Vector3(1, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 0, 0), new Vector3(1, 0, 0), // Правая
 
-    // Пол и потолок
-    new Vector3(0, -1, 0), new Vector3(0, -1, 0), new Vector3(0, -1, 0), new Vector3(0, -1, 0), // Пол (Y-)
-    new Vector3(0, 1, 0), new Vector3(0, 1, 0), new Vector3(0, 1, 0), new Vector3(0, 1, 0),    // Потолок (Y+)
+        // Пол и потолок
+        new Vector3(0, -1, 0), new Vector3(0, -1, 0), new Vector3(0, -1, 0), new Vector3(0, -1, 0), // Пол (Y-)
+        new Vector3(0, 1, 0), new Vector3(0, 1, 0), new Vector3(0, 1, 0), new Vector3(0, 1, 0),    // Потолок (Y+)
 
-    // Крыша
-    new Vector3(0, 0.6f, 0.8f), new Vector3(0, 0.6f, 0.8f), new Vector3(0, 0.6f, 0.8f), // Перед
-    new Vector3(0, 0.6f, -0.8f), new Vector3(0, 0.6f, -0.8f), new Vector3(0, 0.6f, -0.8f), // Зад
+        // Крыша
+        new Vector3(0, 0.6f, 0.8f), new Vector3(0, 0.6f, 0.8f), new Vector3(0, 0.6f, 0.8f), // Перед
+        new Vector3(0, 0.6f, -0.8f), new Vector3(0, 0.6f, -0.8f), new Vector3(0, 0.6f, -0.8f), // Зад
 
-    // Дымоход
-    // В списке normals добавьте:
-// Дымоход
-new Vector3(0,0,1), new Vector3(0,0,1), new Vector3(0,0,1), new Vector3(0,0,1),
-new Vector3(0,0,-1), new Vector3(0,0,-1), new Vector3(0,0,-1), new Vector3(0,0,-1),
-new Vector3(-1,0,0), new Vector3(-1,0,0), new Vector3(-1,0,0), new Vector3(-1,0,0),
-new Vector3(1,0,0), new Vector3(1,0,0), new Vector3(1,0,0), new Vector3(1,0,0),
-new Vector3(0,1,0), new Vector3(0,1,0), new Vector3(0,1,0), new Vector3(0,1,0),
-new Vector3(0,-1,0), new Vector3(0,-1,0), new Vector3(0,-1,0), new Vector3(0,-1,0),
-            new Vector3(0,0.8f,0.2f), // Нормаль, соответствующая наклону крыши
-new Vector3(0,0.8f,0.2f),
-new Vector3(0,0.8f,0.2f),
-new Vector3(0,0.8f,0.2f),
-
-};
+        // Дымоход
+        new Vector3(0,0,1), new Vector3(0,0,1), new Vector3(0,0,1), new Vector3(0,0,1),
+        new Vector3(0,0,-1), new Vector3(0,0,-1), new Vector3(0,0,-1), new Vector3(0,0,-1),
+        new Vector3(-1,0,0), new Vector3(-1,0,0), new Vector3(-1,0,0), new Vector3(-1,0,0),
+        new Vector3(1,0,0), new Vector3(1,0,0), new Vector3(1,0,0), new Vector3(1,0,0),
+        new Vector3(0,1,0), new Vector3(0,1,0), new Vector3(0,1,0), new Vector3(0,1,0),
+        new Vector3(0,-1,0), new Vector3(0,-1,0), new Vector3(0,-1,0), new Vector3(0,-1,0),
+        new Vector3(0,0.8f,0.2f), // Нормаль, соответствующая наклону крыши
+        new Vector3(0,0.8f,0.2f),
+        new Vector3(0,0.8f,0.2f),
+        new Vector3(0,0.8f,0.2f),
+        };
 
         // Индексы
         uint[] indices =
         {
-    // Основной корпус (6 граней)
-    0,1,2, 2,3,0,     // Перед
-    4,5,6, 6,7,4,     // Зад
-    8,9,10, 10,11,8,  // Левая
-    12,13,14, 14,15,12, // Правая
-    16,17,18, 18,19,16, // Пол
-    20,21,22, 22,23,20, // Потолок
+        // Основной корпус (6 граней)
+        0,1,2, 2,3,0,             // Перед
+        4,5,6, 6,7,4,             // Зад
+        8,9,10, 10,11,8,          // Левая
+        12,13,14, 14,15,12,       // Правая
+        16,17,18, 18,19,16,       // Пол
+        20,21,22, 22,23,20,       // Потолок
 
-    // Передний треугольник крыши
-    24, 25, 26,
+        //Крыша 
+        24, 25, 26,              // Передний треугольник 
+        27, 28, 26,              // Задний треугольник 
+        29, 30, 31, 31, 32, 29,  // Нижняя грань
+        33, 34, 26,              // Левая боковая грань
+        35, 36, 26,              // Правая боковая грань
 
-    // Задний треугольник крыши
-    27, 28, 26,
+        // Дымоход (4 грани)
+        37,38,39, 39,40,37,     // Передняя грань
+        41,42,43, 43,44,41,     // Задняя грань
+        37,41,44, 44,40,37,     // Левая грань
+        38,42,43, 43,39,38,     // Правая грань
+        40,39,43, 43,44,40,     // Верхняя грань
+        37,38,42, 42,41,37      // Нижняя грань
+        };
 
-    // Нижняя грань крыши
-    29, 30, 31, 31, 32, 29,
+        int VAO;                                // Vertex Array Object
+        int VBO;                                // Vertex Buffer Object
+        int EBO;                                // Element Buffer Object
 
-    // Левая боковая грань
-    33, 34, 26,
+        Shader shaderProgram = new Shader();    // Шейдерная программа 
 
-    // Правая боковая грань
-    35, 36, 26, 
-    // Дымоход (4 грани)
-    // Дымоход (36 индексов)
-37,38,39, 39,40,37,     // Передняя грань
-41,42,43, 43,44,41,     // Задняя грань
-37,41,44, 44,40,37,     // Левая грань
-38,42,43, 43,39,38,     // Правая грань
-40,39,43, 43,44,40,     // Верхняя грань
-37,38,42, 42,41,37      // Нижняя грань
-};
+        // Текстуры
+        int textureWalls;     // Стены
+        int textureWood;      // Дерево (нужна для крыши, пола и потолка)
+        int textureChimney;   // Дымоход
 
-
-        int VAO;
-        int VBO;
-        int EBO;
-        Shader shaderProgram = new Shader();
-        int textureWalls;
-        int textureWood; // Новая текстура для верхней и нижней граней
-        int textureVBO;
+        // Камера и параметры управления 
         Camera camera;
+        float xRot = 0f;                     // Угол вращения по Х
+        float yRot = 0f;                     // Угол вращения по Y
+        private int cubeDistance = 3;        // Дистанция до объекта 
+        const float rotationSpeed = 0.5f;    // Скорость вращения 
+        private float _brightness = 1.0f;    // Освещение 
 
-        float xRot = 0f;
-        float yRot = 0f;
-        private int cubeDistance = 3;
-        const float rotationSpeed = 0.5f;
-        private float _brightness = 1.0f;
-        private int textureStone;
-        private int textureChimney;
-
-        private const float ChimneyXOffset = 0.6f;
-        private const float ChimneyYOffset = 0.4f;
-        private const float ChimneyZOffset = 0.4f;
 
         public Game(int width, int height) : base(GameWindowSettings.Default, NativeWindowSettings.Default)
         {
@@ -294,60 +287,38 @@ new Vector3(0,0.8f,0.2f),
             this.width = width;
         }
 
-        protected override void OnMouseWheel(MouseWheelEventArgs e)
-        {
-            _brightness = Math.Clamp(_brightness + e.OffsetY * 0.1f, 0.0f, 3.0f);
-            base.OnMouseWheel(e);
-        }
-
         protected override void OnLoad()
         {
             base.OnLoad();
 
-            //Create VAO
+            // Генерация и привязка VAO/ VBO / EBO
             VAO = GL.GenVertexArray();
-            //Create VBO
             VBO = GL.GenBuffer();
-            //Bind the VBO 
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-            //Copy vertices data to the buffer
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Count * Vector3.SizeInBytes, vertices.ToArray(), BufferUsageHint.StaticDraw);
-            //Bind the VAO
             GL.BindVertexArray(VAO);
-            //Point a slot number 0
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
-            //Enable the slot
             GL.EnableVertexArrayAttrib(VAO, 0);
-
-            //Unbind the VBO
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-
-            //EBO 
             EBO = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
             GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
-            //Create, bind texture
-            textureVBO = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, textureVBO);
+            textureChimney = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, textureChimney);
             GL.BufferData(BufferTarget.ArrayBuffer, texCoords.Count * Vector2.SizeInBytes, texCoords.ToArray(), BufferUsageHint.StaticDraw);
-            //Point a slot number 1
             GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 0, 0);
-            //Enable the slot
             GL.EnableVertexArrayAttrib(VAO, 1);
-
-            //Delete everything
             GL.BindVertexArray(0);
 
+            // Компилирование и загрузка шейдеров
             shaderProgram.LoadShader();
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
-
-
-            // Загрузка первой текстуры (i.png)
+            // Загрузка текстуры для стен (i.png)
             textureWalls = GL.GenTexture();
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureWalls);
@@ -362,7 +333,7 @@ new Vector3(0,0.8f,0.2f),
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, wallsTexture.Width, wallsTexture.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, wallsTexture.Data);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-            // Загрузка второй текстуры (other.png)
+            // Загрузка тесктурв для крыши (other.png)
             textureWood = GL.GenTexture();
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, textureWood);
@@ -376,7 +347,7 @@ new Vector3(0,0.8f,0.2f),
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, woodTexture.Width, woodTexture.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, woodTexture.Data);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-
+            // Загрузка текстуры для дымохода
             textureChimney = GL.GenTexture();
             GL.ActiveTexture(TextureUnit.Texture2);
             GL.BindTexture(TextureTarget.Texture2D, textureChimney);
@@ -387,28 +358,15 @@ new Vector3(0,0.8f,0.2f),
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
             StbImage.stbi_set_flip_vertically_on_load(1);
-            ImageResult chimneyTexture = ImageResult.FromStream(
-                File.OpenRead("../../../Textures/rock.png"),
-                ColorComponents.RedGreenBlueAlpha
-            );
-            GL.TexImage2D(
-                TextureTarget.Texture2D,
-                0,
-                PixelInternalFormat.Rgba,
-                chimneyTexture.Width,
-                chimneyTexture.Height,
-                0,
-                PixelFormat.Rgba,
-                PixelType.UnsignedByte,
-                chimneyTexture.Data
-            );
+            ImageResult chimneyTexture = ImageResult.FromStream(File.OpenRead("../../../Textures/rock.png"), ColorComponents.RedGreenBlueAlpha);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, chimneyTexture.Width, chimneyTexture.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, chimneyTexture.Data);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-
-
+            // Включение теста глубины
             GL.Enable(EnableCap.DepthTest);
 
+            // Инициализация камеры
             camera = new Camera(width, height, Vector3.Zero);
         }
 
@@ -454,39 +412,28 @@ new Vector3(0,0.8f,0.2f),
             // Передача яркости освещения
             GL.Uniform1(GL.GetUniformLocation(shaderProgram.shaderHandle, "lightIntensity"), _brightness);
 
-
-
             // Привязка VAO и EBO
             GL.BindVertexArray(VAO);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, EBO);
 
-            // Отрисовка 4 граней с первой текстурой
+            // Отрисовка стен
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureWalls);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram.shaderHandle, "texture0"), 0);
             GL.DrawElements(PrimitiveType.Triangles, 24, DrawElementsType.UnsignedInt, 0);
 
-
-
-
-            // Отрисовка 2 граней со второй текстурой
+            // Отрисовка пола и потолка
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, textureWood);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram.shaderHandle, "texture0"), 1);
             GL.DrawElements(PrimitiveType.Triangles, 12, DrawElementsType.UnsignedInt, 24 * sizeof(uint));
 
-            // Отрисовка крыши (textureWood)
+            // Отрисовка крыши
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, textureWood);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram.shaderHandle, "textureWood"), 1);
-
-            // Передний и задний треугольники (6 индексов)
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 36 * sizeof(uint));
-
-            // Нижняя грань (6 индексов)
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 42 * sizeof(uint));
-
-            // Боковые грани (6 индексов)
             GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, 48 * sizeof(uint));
 
 
@@ -496,39 +443,37 @@ new Vector3(0,0.8f,0.2f),
             GL.Uniform1(GL.GetUniformLocation(shaderProgram.shaderHandle, "texture0"), 1);
             GL.DrawElements(PrimitiveType.Triangles, 5, DrawElementsType.UnsignedInt, 24 * sizeof(uint));
 
-
-            // В методе OnRenderFrame замените блок отрисовки дымохода на:
-            // Привязка текстуры дымохода
+            // Отрисовка дымохода (с заданной позицией относительно дома)
             GL.ActiveTexture(TextureUnit.Texture2);
             GL.BindTexture(TextureTarget.Texture2D, textureChimney);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram.shaderHandle, "texture0"), 2);
-
-            // Позиция дымохода относительно дома
-            float heightCorrection = ChimneyXOffset * 0.1f; // Эмпирическая формула
+            float heightCorrection = 0.6f * 0.1f; 
             Matrix4 chimneyModel = model *
                 Matrix4.CreateTranslation(
-                    ChimneyXOffset + 10f,
-                    ChimneyYOffset + heightCorrection,
-                    ChimneyZOffset
+                    0.6f + 10f,
+                    0.4f + heightCorrection,
+                    0.4f
                 );
-
-            // Отрисовка дымохода (36 индексов со смещением 192 байта)
             GL.DrawElements(PrimitiveType.Triangles, 36, DrawElementsType.UnsignedInt, 54 * sizeof(uint));
-
 
             // Обмен буферов и завершение рендера
             Context.SwapBuffers();
             base.OnRenderFrame(args);
         }
 
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            _brightness = Math.Clamp(_brightness + e.OffsetY * 0.1f, 0.0f, 3.0f);
+            base.OnMouseWheel(e);
+        }
+
         protected override void OnUpdateFrame(FrameEventArgs args)
         {
-            if (KeyboardState.IsKeyDown(Keys.Escape))
-            {
-                Close();
-            }
-
             KeyboardState input = KeyboardState;
+
+            // Закрытие игры при нажатии Esc
+            if (input.IsKeyDown(Keys.Escape))
+                Close();
 
             // Обработка вращения клавишами WASD
             if (input.IsKeyDown(Keys.W))
